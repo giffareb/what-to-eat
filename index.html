@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>วันนี้กินอะไรดี?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-lg mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 text-center">
+            
+            <div class="mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">วันนี้กินอะไรดี?</h1>
+                <p class="text-gray-500 mt-2">ให้ AI ช่วยคิดเมนูเด็ดๆ จากโจทย์ของคุณ!</p>
+            </div>
+
+            <div class="bg-orange-50 border-2 border-dashed border-orange-200 p-4 rounded-xl mb-6 text-left">
+                <h2 class="font-bold text-lg text-orange-800 mb-2">✨ โหมดล้างบางตู้เย็น</h2>
+                <p class="text-sm text-orange-700 mb-3">Prompt วัตถุดิบ,เงื่อนไขหรือชื่อเมนูที่ต้องการ (เช่น ไก่, ราคาถูก, หาได้ในเซเว่น, ไม่ใช้เครื่องปรุง, ข้าวซอย)</p>
+                <textarea id="ingredientsInput" class="w-full bg-white border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 p-3" rows="2" placeholder="แต่ละ Prompt คั่นด้วยจุลภาค (,)"></textarea>
+                <button id="generateFromIngredientsBtn" class="mt-3 w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-300 transform hover:scale-105 shadow-md">
+                    💡 ช่วยคิดเมนูจากของที่มี
+                </button>
+            </div>
+
+            <div class="relative flex pb-5 items-center">
+                <div class="flex-grow border-t border-gray-300"></div>
+                <span class="flex-shrink mx-4 text-gray-500 font-semibold">หรือ</span>
+                <div class="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <div class="space-y-4 mb-6 text-left">
+                 <h2 class="font-bold text-lg text-indigo-800 mb-2">✨ โหมดอะไรก็ได้ (เน้นทำง่ายๆหาง่ายๆ)</h2>
+                <div>
+                    <label for="mealType" class="block text-sm font-medium text-gray-700 mb-1">มื้ออาหาร</label>
+                    <select id="mealType" class="w-full bg-gray-100 border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3">
+                        <option value="อะไรก็ได้">อะไรก็ได้</option>
+                        <option value="มื้อเช้า">มื้อเช้า</option>
+                        <option value="มื้อกลางวัน">มื้อกลางวัน</option>
+                        <option value="มื้อเย็น">มื้อเย็น</option>
+                        <option value="ของว่าง">ของว่าง</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="cuisineType" class="block text-sm font-medium text-gray-700 mb-1">แนวอาหาร</label>
+                    <select id="cuisineType" class="w-full bg-gray-100 border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3">
+                        <option value="อะไรก็ได้">อะไรก็ได้</option>
+                        <option value="อาหารไทย">อาหารไทย</option>
+                        <option value="อาหารญี่ปุ่น">อาหารญี่ปุ่น</option>
+                        <option value="อาหารเกาหลี">อาหารเกาหลี</option>
+                        <option value="อาหารอิตาเลียน">อาหารอิตาเลียน</option>
+                        <option value="อาหารคลีน">อาหารคลีน</option>
+                        <option value="อาหารสิ้นคิด">อาหารสิ้นคิด (ง่ายๆ เร็วๆ)</option>
+                    </select>
+                </div>
+                 <button id="generateBtn" class="w-full bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105 shadow-md">
+                    สุ่มเมนูตามใจเชฟ!
+                </button>
+            </div>
+            
+            <div id="loader" class="mt-8 text-center hidden">
+                 <div class="flex justify-center items-center space-x-2">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
+                    <p class="text-gray-600 font-medium">AI กำลังเข้าครัว... ขอคิดแป๊บ!</p>
+                </div>
+            </div>
+            
+            <div id="errorMessage" class="mt-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative hidden opacity-0" role="alert"></div>
+
+            <div id="resultArea" class="mt-6 hidden">
+                <div id="resultCard" class="text-left bg-gray-50 border border-gray-200 p-6 rounded-2xl shadow-inner">
+                    <h2 id="menuName" class="text-2xl font-bold text-gray-800"></h2>
+                    <p id="description" class="mt-2 text-gray-600"></p>
+                    <hr class="my-4 border-gray-200">
+                    <h3 class="font-semibold text-gray-800">วัตถุดิบหลัก:</h3>
+                    <ul id="ingredientsList" class="mt-2 list-disc list-inside space-y-1 text-gray-600"></ul>
+                    <button id="getRecipeBtn" class="mt-5 w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 transform hover:scale-105 shadow">🧑‍🍳 ทำไงอะ? (กูทำไม่เป็น)! ✨</button>
+                </div>
+
+                <div id="recipeCard" class="mt-4 text-left bg-green-50 border border-green-200 p-6 rounded-2xl shadow-inner hidden">
+                    <div id="recipeLoader" class="text-center hidden p-4">
+                        <div class="flex items-center justify-center space-x-2">
+                             <div class="loader-dots">
+                                <div class="w-3 h-3 bg-green-500 rounded-full dot1"></div>
+                                <div class="w-3 h-3 bg-green-500 rounded-full dot2"></div>
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            </div>
+                            <span class="text-green-700">AI กำลังเขียนสูตร...</span>
+                        </div>
+                    </div>
+                    <div id="recipeContent"></div>
+                </div>
+            </div>
+        </div>
+         <footer class="text-center mt-4 text-sm text-gray-400">
+            <p>ขับเคลื่อนด้วยพลัง AI สุดสร้างสรรค์</p>
+        </footer>
+    </div>
+    
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
